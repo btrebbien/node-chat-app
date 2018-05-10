@@ -18,6 +18,18 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('New user connected.');
 
+  // create a newMessage for other clients
+  socket.emit('newMessage', {
+    from: newMessageFromClient.from,
+    text: newMessageFromClient.text,
+    createdAt: new Date().toString()
+  });
+
+  // listen for custom event createMessage from Client
+  socket.on('createMessage', (newMessageFromClient) => {
+    console.log('createMessage', newMessageFromClient);
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected.');
   });
