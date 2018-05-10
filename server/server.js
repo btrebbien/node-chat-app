@@ -11,6 +11,8 @@ var server = http.createServer(app);
 // websocket server created to emit and listen to events
 var io = socketIO(server);
 
+const util = require('./utils/message.js');
+
 
 // configure express middleware (holds html so keep below maintenance)
 app.use(express.static(publicPath));
@@ -19,28 +21,19 @@ io.on('connection', (socket) => {
   console.log('New user connected.');
 
   // send a welcome message just to the client that connects
-  socket.emit('newMessage', {
-    from: 'Admin',
-    text: 'Welcome to the chat',
-    createdAt: new Date().getTime()
-  });
+  socket.emit('newMessage', util.generateMessage('Admin', 'Welcome to the chat.'));
   // broadcast to all others that someone joined
-  socket.broadcast.emit('newMessage', {
-    from: 'Admin',
-    text: 'New user joined',
-    createdAt: new Date().getTime()
-  });
+  socket.broadcast.emit('newMessage', util.generateMessage('Admin', 'New user joined.'));
 
   // listen for custom event createMessage from Client
   // then send the message to all connected cliens
-  socket.on('createMessage', (newMessageFromClient) => {
+  // callback here is an actual callback function which fires an ack to the client
+  // callback function can only take one argument
+  socket.on('createMessage', (newMessageFromClient, callback) => {
     console.log('createMessage', newMessageFromClient);
     // emits an event to all connections
-    io.emit('newMessage', {
-      from: newMessageFromClient.from,
-      text: newMessageFromClient.text,
-      createdAt: new Date().getTime()
-    });
+    io.emit('newMessage', util.generateMessage(newMessageFromClient.from, newMessageFromClient.text));
+    callback('This is from the server.');
     // to fire to all clients except the originating client use broadcast
     // socket.broadcast.emit('newMessage', {
     //   from: newMessageFromClient.from,
