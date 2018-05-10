@@ -1,7 +1,5 @@
 FROM node:carbon
 
-MAINTAINER b[dot]trebbien@gmail.com
-
 USER root
 
 RUN apt-get update && \
