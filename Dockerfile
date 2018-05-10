@@ -19,4 +19,4 @@ EXPOSE 3000
 
 USER node
 
-#CMD ["nodemon", "app.js"]
+CMD ["node", "server/server.js"]
