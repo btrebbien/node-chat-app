@@ -12,16 +12,35 @@ socket.on('disconnect', function () {
   console.log('Disconnected from the server.');
 });
 
-// custom event listener
+// custom event listener for new Messages
 socket.on('newMessage', function (message) {
   console.log('New message', message);
-  // use jQuery to create an element
+  // use jQuery to create a list element
   var li = jQuery('<li></li>');
   // set the text property of li
   li.text(`${message.from}: ${message.text}`);
   // add the element to the DOM via append to the bottom of the ordered list
   jQuery('#messages').append(li);
-})
+});
+
+// custom event listener to handle displaying google maps links from geolocation
+// by using li.text and a.attr we are preventing someone from injecting malicious HTML
+socket.on('newLocationMessage', function (message) {
+  // use jQuery to create a list element
+  var li = jQuery('<li></li>');
+  // use jQuery to create an anchor tag
+  // the tag will have free text My Current Location
+  // target="_blank" will have the browser open the link in a new tab
+  var a = jQuery('<a target="_blank">My Current Location</a>');
+  // tell who the message is from
+  li.text(`${message.from}: `);
+  // update the anchor tag and set href = url
+  a.attr('href', message.url);
+  // append the anchor tag to the list element
+  li.append(a);
+  // append to the ordered list DOM
+  jQuery('#messages').append(li);
+});
 
 // jquery with e event in callback. We need to do this to override default form behavior
 jQuery('#message-form').on('submit', function (e) {
@@ -37,5 +56,24 @@ jQuery('#message-form').on('submit', function (e) {
     text: jQuery('[name=message]').val()
   }, function () {
 
+  });
+});
+
+// store the jQuery selector in a variable to save calling it again in the future
+// only need to manipulate the DOM once this way
+var locationButton = jQuery('#send-location');
+locationButton.on('click', function () {
+  // if there is no geolocation object on navigator then alert user no geolocation
+  if (!navigator.geolocation) {
+    return alert('Geolocation not supported by your browser.');
+  }
+
+  navigator.geolocation.getCurrentPosition(function (position) {
+    socket.emit('createLocationMessage', {
+      latitude: position.coords.latitude,
+      longitude: position.coords.longitude
+    });
+  }, function () {
+    alert('Unable to fetch location.');
   });
 });

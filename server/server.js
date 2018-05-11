@@ -34,12 +34,11 @@ io.on('connection', (socket) => {
     // emits an event to all connections
     io.emit('newMessage', util.generateMessage(newMessageFromClient.from, newMessageFromClient.text));
     callback('This is from the server.');
-    // to fire to all clients except the originating client use broadcast
-    // socket.broadcast.emit('newMessage', {
-    //   from: newMessageFromClient.from,
-    //   text: newMessageFromClient.text,
-    //   createdAt: new Date().getTime()
-    // });
+  });
+
+  // register listener for geolocation coordinates from client
+  socket.on('createLocationMessage', (coords) => {
+    io.emit('newLocationMessage', util.generateLocationMessage('Admin', coords.latitude, coords.longitude));
   });
 
   socket.on('disconnect', () => {
