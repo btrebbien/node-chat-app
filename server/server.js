@@ -33,7 +33,8 @@ io.on('connection', (socket) => {
     console.log('createMessage', newMessageFromClient);
     // emits an event to all connections
     io.emit('newMessage', util.generateMessage(newMessageFromClient.from, newMessageFromClient.text));
-    callback('This is from the server.');
+    // we do not need any info from the server other than a response of completion
+    callback();
   });
 
   // register listener for geolocation coordinates from client
